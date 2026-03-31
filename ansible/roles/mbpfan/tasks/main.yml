@@ -1,0 +1,12 @@
+---
+- name: Install mbpfan
+  apt:
+    name: mbpfan
+    state: present
+    update_cache: yes
+
+- name: Enable and start mbpfan
+  systemd:
+    name: mbpfan
+    enabled: yes
+    state: started

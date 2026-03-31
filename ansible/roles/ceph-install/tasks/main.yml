@@ -1,0 +1,9 @@
+---
+- name: Check if Ceph is already installed
+  stat:
+    path: /etc/ceph/ceph.conf
+  register: ceph_conf
+
+- name: Install Ceph packages via pveceph
+  command: pveceph install --repository no-subscription
+  when: not ceph_conf.stat.exists

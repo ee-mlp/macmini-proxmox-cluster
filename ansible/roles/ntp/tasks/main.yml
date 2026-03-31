@@ -1,0 +1,16 @@
+---
+- name: Install chrony
+  apt:
+    name: chrony
+    state: present
+    update_cache: yes
+
+- name: Enable and start chronyd
+  systemd:
+    name: chronyd
+    enabled: yes
+    state: started
+
+- name: Wait for NTP synchronization
+  command: chronyc waitsync 10 0.1 0.5 60
+  changed_when: false

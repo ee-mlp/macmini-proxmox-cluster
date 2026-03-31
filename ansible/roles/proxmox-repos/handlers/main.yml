@@ -1,0 +1,10 @@
+---
+- name: reboot
+  reboot:
+    reboot_timeout: 300
+
+- name: wait for connection after reboot
+  wait_for_connection:
+    delay: 10
+    timeout: 300
+  listen: reboot

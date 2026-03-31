@@ -1,0 +1,5 @@
+---
+- name: Deploy CephFS
+  hosts: proxmox
+  roles:
+    - cephfs

@@ -1,0 +1,21 @@
+---
+- name: Disable enterprise repository
+  replace:
+    path: /etc/apt/sources.list.d/pve-enterprise.list
+    regexp: '^(deb .*)'
+    replace: '#\1'
+
+- name: Enable no-subscription repository
+  copy:
+    dest: /etc/apt/sources.list.d/pve-no-subscription.list
+    content: "deb http://download.proxmox.com/debian/pve trixie pve-no-subscription\n"
+
+- name: Run apt-get update
+  apt:
+    update_cache: yes
+
+- name: Full upgrade packages
+  apt:
+    upgrade: full
+  register: apt_upgrade
+  notify: reboot

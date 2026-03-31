@@ -1,0 +1,15 @@
+---
+- name: update initramfs and reboot
+  command: update-initramfs -u -k all
+  listen: update initramfs and reboot
+
+- name: reboot after initramfs update
+  reboot:
+    reboot_timeout: 300
+  listen: update initramfs and reboot
+
+- name: wait for connection after reboot
+  wait_for_connection:
+    delay: 10
+    timeout: 300
+  listen: update initramfs and reboot

@@ -1,0 +1,134 @@
+---
+# ---------------------------------------------------------------------------
+# Section: init — run on pve_primary only
+# ---------------------------------------------------------------------------
+- name: Check if Ceph cluster is already initialized
+  command: grep -q fsid /etc/ceph/ceph.conf
+  register: ceph_initialized
+  ignore_errors: yes
+  changed_when: false
+  when: inventory_hostname == groups['pve_primary'][0]
+
+- name: Initialize Ceph cluster
+  command: >
+    pveceph init
+    --network {{ ceph_subnet }}
+    --cluster-network {{ ceph_subnet }}
+  when:
+    - inventory_hostname == groups['pve_primary'][0]
+    - ceph_initialized is not skipped
+    - ceph_initialized.rc != 0
+
+# ---------------------------------------------------------------------------
+# Section: monitors — run on all nodes
+# ---------------------------------------------------------------------------
+- name: Check if Ceph monitor already exists
+  stat:
+    path: /var/lib/ceph/mon/ceph-{{ inventory_hostname }}
+  register: ceph_mon_dir
+
+- name: Create Ceph monitor
+  command: pveceph mon create
+  when: not ceph_mon_dir.stat.exists
+
+# ---------------------------------------------------------------------------
+# Section: managers — run on all nodes
+# ---------------------------------------------------------------------------
+- name: Check if Ceph manager already exists
+  stat:
+    path: /var/lib/ceph/mgr/ceph-{{ inventory_hostname }}
+  register: ceph_mgr_dir
+
+- name: Create Ceph manager
+  command: pveceph mgr create
+  when: not ceph_mgr_dir.stat.exists
+
+# ---------------------------------------------------------------------------
+# Section: OSDs — run on all nodes
+# ---------------------------------------------------------------------------
+- name: List NVMe partitions
+  command: lsblk -no NAME {{ nvme_device }}
+  register: nvme_parts
+  changed_when: false
+
+- name: Create Ceph OSD partition on NVMe
+  when: "ceph_osd_partition | basename not in nvme_parts.stdout"
+  block:
+    - name: Create partition starting at {{ ceph_partition_start }}
+      command: >
+        parted -s -a optimal {{ nvme_device }}
+        mkpart primary {{ ceph_partition_start }} 100%
+
+    - name: Wait for OSD partition to appear
+      wait_for:
+        path: "{{ ceph_osd_partition }}"
+        timeout: 30
+
+- name: Check if OSD already exists for this partition
+  command: pveceph osd list
+  register: pve_osd_list
+  changed_when: false
+
+- name: Create Ceph OSD on NVMe partition
+  command: pveceph osd create {{ ceph_osd_partition }}
+  when: "ceph_osd_partition not in pve_osd_list.stdout"
+
+# ---------------------------------------------------------------------------
+# Section: pool — run on pve_primary only
+# ---------------------------------------------------------------------------
+- name: List existing Ceph pools
+  command: ceph osd pool ls
+  register: ceph_pools
+  changed_when: false
+  when: inventory_hostname == groups['pve_primary'][0]
+
+- name: Create Ceph pool
+  command: >
+    pveceph pool create {{ ceph_pool_name }}
+    --size {{ ceph_pool_size }}
+    --min_size {{ ceph_pool_min_size }}
+  when:
+    - inventory_hostname == groups['pve_primary'][0]
+    - ceph_pool_name not in ceph_pools.stdout
+
+- name: List existing PVE storage entries
+  command: pvesm status
+  register: pvesm_list
+  changed_when: false
+  when: inventory_hostname == groups['pve_primary'][0]
+
+- name: Add Ceph RBD storage to PVE
+  command: >
+    pvesm add rbd ceph-storage
+    --pool {{ ceph_pool_name }}
+    --content images,rootdir
+  when:
+    - inventory_hostname == groups['pve_primary'][0]
+    - "'ceph-storage' not in pvesm_list.stdout"
+
+# ---------------------------------------------------------------------------
+# Section: migration network — run on pve_primary only
+# ---------------------------------------------------------------------------
+- name: Configure migration network in datacenter config
+  lineinfile:
+    path: /etc/pve/datacenter.cfg
+    regexp: '^migration:'
+    line: "migration: network={{ ceph_subnet }},type=secure"
+    state: present
+  when: inventory_hostname == groups['pve_primary'][0]
+
+# ---------------------------------------------------------------------------
+# Section: verify — run on pve_primary only
+# ---------------------------------------------------------------------------
+- name: Check Ceph cluster health
+  command: ceph status
+  register: ceph_status
+  changed_when: false
+  when: inventory_hostname == groups['pve_primary'][0]
+
+- name: Assert Ceph cluster is healthy
+  assert:
+    that: "'HEALTH_OK' in ceph_status.stdout"
+    fail_msg: "Ceph cluster is not healthy: {{ ceph_status.stdout }}"
+    success_msg: "Ceph cluster reports HEALTH_OK"
+  when: inventory_hostname == groups['pve_primary'][0]

@@ -1,0 +1,8 @@
+---
+- name: Post-install configuration
+  hosts: proxmox
+  roles:
+    - proxmox-repos
+    - mbpfan
+    - iommu
+    - diagnostics

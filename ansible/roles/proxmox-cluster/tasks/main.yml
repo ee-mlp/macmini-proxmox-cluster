@@ -1,0 +1,34 @@
+---
+- name: Check cluster membership status
+  command: pvecm status
+  register: pvecm_status
+  ignore_errors: yes
+  changed_when: false
+
+- name: Create cluster on primary node
+  when:
+    - inventory_hostname == groups['pve_primary'][0]
+    - pvecm_status.rc != 0
+  block:
+    - name: Initialize Proxmox cluster
+      command: pvecm create {{ cluster_name }}
+
+    - name: Wait for cluster to stabilize
+      pause:
+        seconds: 10
+
+- name: Join worker node to cluster
+  when:
+    - inventory_hostname in groups['pve_workers']
+    - pvecm_status.rc != 0
+  block:
+    - name: Add node to cluster
+      command: pvecm add {{ pve_primary_ip }}
+
+    - name: Wait for cluster quorum to stabilize
+      command: pvecm status
+      register: pvecm_join_check
+      until: "'Quorum' in pvecm_join_check.stdout"
+      retries: 12
+      delay: 10
+      changed_when: false

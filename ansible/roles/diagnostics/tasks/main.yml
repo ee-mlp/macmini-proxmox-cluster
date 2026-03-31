@@ -1,0 +1,14 @@
+---
+- name: Install diagnostic tools
+  apt:
+    name:
+      - lldpd
+      - iperf3
+    state: present
+    update_cache: yes
+
+- name: Enable and start lldpd
+  systemd:
+    name: lldpd
+    enabled: yes
+    state: started

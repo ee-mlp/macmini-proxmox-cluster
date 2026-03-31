@@ -1,0 +1,23 @@
+---
+- name: Check if MDS already exists on this node
+  stat:
+    path: /var/lib/ceph/mds/ceph-{{ inventory_hostname }}
+  register: ceph_mds_dir
+
+- name: Create CephFS MDS on pve1 and pve2
+  command: pveceph mds create
+  when:
+    - inventory_hostname in ['pve1', 'pve2']
+    - not ceph_mds_dir.stat.exists
+
+- name: List existing CephFS filesystems
+  command: ceph fs ls
+  register: ceph_fs_list
+  changed_when: false
+  when: inventory_hostname == groups['pve_primary'][0]
+
+- name: Create CephFS filesystem
+  command: pveceph fs create --pg_num 32 --add-storage
+  when:
+    - inventory_hostname == groups['pve_primary'][0]
+    - "'cephfs' not in ceph_fs_list.stdout"

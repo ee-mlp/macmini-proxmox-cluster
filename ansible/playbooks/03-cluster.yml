@@ -1,0 +1,16 @@
+---
+- name: NTP sync
+  hosts: proxmox
+  roles:
+    - ntp
+
+- name: Create cluster on primary
+  hosts: pve_primary
+  roles:
+    - proxmox-cluster
+
+- name: Join workers to cluster
+  hosts: pve_workers
+  serial: 1
+  roles:
+    - proxmox-cluster

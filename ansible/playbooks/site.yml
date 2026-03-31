@@ -1,0 +1,5 @@
+---
+- import_playbook: 01-post-install.yml
+- import_playbook: 02-thunderbolt.yml
+- import_playbook: 03-cluster.yml
+- import_playbook: 04-ceph.yml

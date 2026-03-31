@@ -1,0 +1,5 @@
+---
+- name: Thunderbolt network setup
+  hosts: proxmox
+  roles:
+    - thunderbolt-network

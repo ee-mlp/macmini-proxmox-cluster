@@ -1,0 +1,14 @@
+---
+- name: Install Ceph on all nodes
+  hosts: proxmox
+  roles:
+    - ceph-install
+
+- name: Initialize Ceph cluster (primary first, then workers)
+  hosts: proxmox
+  serial:
+    - 1        # pve1 runs first (init + first mon/mgr/osd)
+    - "100%"   # pve2 and pve3 run in parallel after
+  order: inventory
+  roles:
+    - ceph-init

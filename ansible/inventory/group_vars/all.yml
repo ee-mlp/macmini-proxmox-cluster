@@ -1,0 +1,19 @@
+cluster_name: my-cluster
+mgmt_subnet: 10.10.15.0/24
+ceph_subnet: 10.10.16.0/24
+
+pve_primary_ip: 10.10.15.11
+
+tb_pci_paths:
+  en05: pci-0000:7d:00.0
+  en06: pci-0000:07:00.0
+
+nvme_device: /dev/nvme0n1
+ceph_partition_start: "64GB"
+# Derived from nvme_device — change ceph_partition_number if installer created a different number of partitions
+ceph_partition_number: 4
+ceph_osd_partition: "{{ nvme_device }}p{{ ceph_partition_number }}"
+
+ceph_pool_name: ceph-pool
+ceph_pool_size: 3
+ceph_pool_min_size: 2
