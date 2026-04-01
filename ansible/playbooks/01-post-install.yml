@@ -4,5 +4,5 @@
   roles:
     - proxmox-repos
     - mbpfan
-    - iommu
     - diagnostics
+    # - iommu  # optional: only needed for PCIe passthrough

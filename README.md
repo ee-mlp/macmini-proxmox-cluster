@@ -96,14 +96,7 @@ apt update && apt full-upgrade -y
 reboot
 ```
 
-### 2.3 Enable IOMMU (all 3 nodes)
-
-```bash
-sed -i 's/^GRUB_CMDLINE_LINUX_DEFAULT=.*/GRUB_CMDLINE_LINUX_DEFAULT="quiet intel_iommu=on iommu=pt"/' /etc/default/grub
-update-grub
-```
-
-### 2.4 Fan Control (important!)
+### 2.3 Fan Control (important!)
 
 Without macOS, the fan controller defaults to low RPM. The `mbpfan` daemon is available directly from the Debian Trixie repos:
 
@@ -114,6 +107,8 @@ systemctl start mbpfan
 ```
 
 Verify it's working with `systemctl status mbpfan`. The daemon reads CPU temperatures via `coretemp` and controls fans via `applesmc`. You can tune thresholds in `/etc/mbpfan.conf` if needed.
+
+> **Optional — PCIe passthrough:** If you plan to pass through a GPU or NVMe to a VM, enable IOMMU: `sed -i 's/^GRUB_CMDLINE_LINUX_DEFAULT=.*/GRUB_CMDLINE_LINUX_DEFAULT="quiet intel_iommu=on iommu=pt"/' /etc/default/grub && update-grub`
 
 ---
 
