@@ -4,9 +4,11 @@ ceph_subnet: 10.10.16.0/24
 
 pve_primary_ip: 10.10.15.11
 
+# en02 → port ③ (Bus B): confirmed on Mac Mini 2018
+# en03 → port ② (Bus A): confirmed on Mac Mini 2018
 tb_pci_paths:
-  en05: pci-0000:7d:00.0
-  en06: pci-0000:07:00.0
+  en02: pci-0000:7d:00.0
+  en03: pci-0000:07:00.0
 
 nvme_device: /dev/nvme0n1
 ceph_partition_start: "64GB"

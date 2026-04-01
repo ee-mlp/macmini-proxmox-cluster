@@ -13,13 +13,13 @@
     state: present
   notify: update initramfs and reboot
 
-- name: Write systemd-networkd link file for en05
+- name: Write systemd-networkd link file for en02
   template:
     src: thunderbolt0.link.j2
     dest: /etc/systemd/network/00-thunderbolt0.link
   notify: update initramfs and reboot
 
-- name: Write systemd-networkd link file for en06
+- name: Write systemd-networkd link file for en03
   template:
     src: thunderbolt1.link.j2
     dest: /etc/systemd/network/00-thunderbolt1.link
@@ -29,12 +29,12 @@
   copy:
     dest: /etc/network/interfaces.d/thunderbolt
     content: |
-      auto en05
-      iface en05 inet manual
+      auto en02
+      iface en02 inet manual
           mtu 9000
 
-      auto en06
-      iface en06 inet manual
+      auto en03
+      iface en03 inet manual
           mtu 9000
   notify: update initramfs and reboot
 
@@ -42,18 +42,18 @@
   copy:
     dest: /etc/udev/rules.d/10-tb-en.rules
     content: |
-      ACTION=="move", SUBSYSTEM=="net", KERNEL=="en05", RUN+="/usr/local/bin/pve-en05.sh"
-      ACTION=="move", SUBSYSTEM=="net", KERNEL=="en06", RUN+="/usr/local/bin/pve-en06.sh"
+      ACTION=="move", SUBSYSTEM=="net", KERNEL=="en02", RUN+="/usr/local/bin/pve-en02.sh"
+      ACTION=="move", SUBSYSTEM=="net", KERNEL=="en03", RUN+="/usr/local/bin/pve-en03.sh"
   notify: update initramfs and reboot
 
-- name: Install pve-en05.sh helper script
+- name: Install pve-en02.sh helper script
   copy:
-    src: pve-en05.sh
-    dest: /usr/local/bin/pve-en05.sh
+    src: pve-en02.sh
+    dest: /usr/local/bin/pve-en02.sh
     mode: '0755'
 
-- name: Install pve-en06.sh helper script
+- name: Install pve-en03.sh helper script
   copy:
-    src: pve-en06.sh
-    dest: /usr/local/bin/pve-en06.sh
+    src: pve-en03.sh
+    dest: /usr/local/bin/pve-en03.sh
     mode: '0755'

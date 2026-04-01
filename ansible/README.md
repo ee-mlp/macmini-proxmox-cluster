@@ -66,9 +66,9 @@ OpenFabric routing in the Proxmox GUI **before** proceeding to cluster formation
 1. Open the Proxmox web UI on any node (e.g. https://10.10.15.11:8006).
 2. Navigate to **Datacenter → SDN → Fabrics → Add**.
 3. Select type **OpenFabric** and configure:
-   - **Node pve1**: Router ID `10.10.16.11`, interfaces `en05`, `en06`
-   - **Node pve2**: Router ID `10.10.16.12`, interfaces `en05`, `en06`
-   - **Node pve3**: Router ID `10.10.16.13`, interfaces `en05`, `en06`
+   - **Node pve1**: Router ID `10.10.16.11`, interfaces `en02`, `en03`
+   - **Node pve2**: Router ID `10.10.16.12`, interfaces `en02`, `en03`
+   - **Node pve3**: Router ID `10.10.16.13`, interfaces `en02`, `en03`
 4. Click **Apply Configuration**.
 5. Verify OpenFabric neighbours are established on each node:
    ```bash
@@ -102,7 +102,7 @@ ansible proxmox -a "lsinitramfs /boot/initrd.img-\$(uname -r) | grep thunderbolt
 # Confirm link files in place
 ansible proxmox -a "cat /etc/systemd/network/00-thunderbolt0.link"
 # After cables connected: confirm interfaces appear
-ansible proxmox -a "ip link show en05; ip link show en06"
+ansible proxmox -a "ip link show en02; ip link show en03"
 ```
 
 ### After 03-cluster
