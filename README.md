@@ -24,7 +24,7 @@ State: docs: beta, ansible playbooks: untested - proceed with caution. PR-s for 
 | Management/LAN  | Ethernet (1GbE) | 10.10.15.0/24     | Proxmox GUI, corosync, VM traffic    |
 | Ceph (public+cluster) | Thunderbolt mesh | 10.10.16.0/24 | All Ceph replication + client traffic |
 
-**Hardware per node:** Mac Mini 2018 (i7-8700B, 32GB RAM (max 64GB), 4× Thunderbolt 3 ports, 1× 1GbE, 2× USB-A)
+**Hardware per node:** Mac Mini 2018 (i7-8700B, 32GB RAM (max 64GB, upgradeable), 512GB Apple NVME SSD (1TB max, not upgradeable), 4× Thunderbolt 3 ports, 1× 1GbE, 2× USB-A)
 
 **Cables needed:** 3× Thunderbolt 3 cables (one per link in the full mesh)
 
